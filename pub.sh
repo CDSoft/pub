@@ -473,6 +473,105 @@ tar xJvf "$archive" -C "$PREFIX" --preserve-order
 end
 ]]
 
+## Installation from sources
+
+It is highly recommended to build LuaX and friends from sources instead of relying on possibly outdated binaries.
+If you still prefer to download archives of prebuild LuaX binaries,
+you can jump to [LuaX light](#luax-light) or [LuaX full](#luax-full).
+
+For the bravest, here are instructions to compile and install LuaX.
+
+### Prerequisites
+
+To compile LuaX from scratch, you first need:
+
+- [Ninja](https://ninja-build.org/)
+
+### Installation path
+
+These softwares are installed by default in `~/.local/bin` and `~/.local/lib`.
+If the environment variable `PREFIX` is defined, they are installed in `$PREFIX/bin` and `$PREFIX/lib`.
+
+``` sh
+$ export PREFIX=install/path
+```
+
+### LuaX
+
+``` sh
+$ git clone https://github.com/CDSoft/luax
+$ cd luax
+$ ./bootstrap && ninja install
+$ cd ..
+```
+
+The next command sets some LuaX variables (`PATH`, `LUA_PATH`, `LUA_CPATH`).
+It can also be added to your shell configuration (`.bashrc`, `.zshrc`...).
+
+``` sh
+$ eval "$(~/.local/bin/luax env)"
+```
+
+or
+
+``` sh
+$ eval "$($PREFIX/bin/luax env)"
+```
+
+### bang
+
+``` sh
+$ git clone https://github.com/CDSoft/bang
+$ cd bang
+$ ninja install
+$ cd ..
+```
+
+### Calculadoira
+
+``` sh
+$ git clone https://github.com/CDSoft/calculadoira
+$ cd calculadoira
+$ ninja install
+$ cd ..
+```
+
+### lsvg
+
+``` sh
+$ git clone https://github.com/CDSoft/lsvg
+$ cd lsvg
+$ ninja install
+$ cd ..
+```
+
+### tagref
+
+``` sh
+$ git clone https://github.com/CDSoft/tagref
+$ cd tagref
+$ ninja install
+$ cd ..
+```
+
+### ypp
+
+``` sh
+$ git clone https://github.com/CDSoft/ypp
+$ cd ypp
+$ ninja install
+$ cd ..
+```
+
+### panda
+
+``` sh
+$ git clone https://github.com/CDSoft/panda
+$ cd panda
+$ ninja install
+$ cd ..
+```
+
 ## LuaX light
 
 The light LuaX archives contain LuaX binaries and some tools written in LuaX:
