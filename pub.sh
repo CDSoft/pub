@@ -402,7 +402,7 @@ for target in "${TARGETS[@]}"
 do
     OPT=(
         --use-compress-program='xz -6'
-        --transform="s#$DIST_LUAX/$target/##"
+        --transform="s#\($DIST_LUAX\|$DIST_FULL\)/$target/##"
     )
     tar -cvf "$PUB/luax-$target.tar.xz"      "${OPT[@]}" "$DIST_LUAX/$target"/* &
     tar -cvf "$PUB/luax-full-$target.tar.xz" "${OPT[@]}" "$DIST_FULL/$target"/* &
@@ -415,13 +415,10 @@ wait
 
 cat <<\EOF | ypp > "$PUB/index.md"
 % LuaX binaries
-
-# LuaX binaries
+% @@( os.setlocale "C"; return os.date "%D" )
 
 @@[[
-os.setlocale "C"
-
-local url = "https://cdelord.fr/luax"
+local url = "https://cdelord.fr/pub"
 
 function size(name)
     local s = fs.stat(name).size
@@ -439,11 +436,11 @@ function t(name)
         local archive = name.."-"..target.name..".tar.xz"
         local script = name.."-"..target.name..".sh"
         local install = "`curl -s "..url/script.." | sh`"
-        bins[#bins+1] = F{
+        bins[#bins+1] = "| "..F{
             "["..target.name.."]("..url/archive..")",
             install,
             size("pub"/archive)
-        }:str" | "
+        }:str" | ".." |"
         local i = (F.I % "@()") {
             ARCHIVE_NAME = archive,
             URL = url,
@@ -475,8 +472,6 @@ tar xJvf "$archive" -C "$PREFIX" --preserve-order
     return bins
 end
 ]]
-
-Last update: @os.date "%D"
 
 ## LuaX light
 
