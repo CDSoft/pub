@@ -73,6 +73,7 @@ gitclone()
     local URL="$1"
     local DIR="$2"
     [ -d "$DIR" ] || git clone "$URL" "$DIR"
+    ( cd "$DIR" && git fetch && git rebase )
 }
 
 download()
