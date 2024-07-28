@@ -1,4 +1,23 @@
 #!/bin/bash
+######################################################################
+# This file is part of luax.
+#
+# luax is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# luax is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with luax.  If not, see <https://www.gnu.org/licenses/>.
+#
+# For further information about luax you can visit
+# http://cdelord.fr/luax and http://cdelord.fr/pub
+######################################################################
 
 CACHE=cache
 DIST="$CACHE/dist"
@@ -399,15 +418,34 @@ done
 
 mkdir -p "$PUB"
 
+OPT_XZ=(
+    --use-compress-program='xz -6'
+    --sort=name
+)
+OPT_GZ=(
+    --use-compress-program='gzip -9'
+    --sort=name
+)
+OPT_ZIP=(
+    -9
+)
+
 for target in "${TARGETS[@]}"
 do
-    OPT=(
-        --use-compress-program='xz -6'
-        --transform="s#\($DIST_LUAX\|$DIST_FULL\)/$target/##"
-        --sort=name
-    )
-    tar -cvf "$PUB/luax-$target.tar.xz"      "${OPT[@]}" "$DIST_LUAX/$target"/* &
-    tar -cvf "$PUB/luax-full-$target.tar.xz" "${OPT[@]}" "$DIST_FULL/$target"/* &
+    ( cd "$DIST_LUAX/$target" && tar -cvf "$ROOT/$PUB/luax-$target.tar.xz"      "${OPT_XZ[@]}" . ) &
+    ( cd "$DIST_FULL/$target" && tar -cvf "$ROOT/$PUB/luax-full-$target.tar.xz" "${OPT_XZ[@]}" . ) &
+
+    #( cd "$DIST_LUAX/$target" && tar -cvf "$ROOT/$PUB/luax-$target.tar.gz"      "${OPT_GZ[@]}" . ) &
+    #( cd "$DIST_FULL/$target" && tar -cvf "$ROOT/$PUB/luax-full-$target.tar.gz" "${OPT_GZ[@]}" . ) &
+
+    case "$target" in
+        windows-*)
+            rm -f "$ROOT/$PUB/luax-$target.zip"
+            rm -f "$ROOT/$PUB/luax-full-$target.zip"
+            ( cd "$DIST_LUAX/$target" &&  zip -r "${OPT_ZIP[@]}" "$ROOT/$PUB/luax-$target.zip" . ) &
+            ( cd "$DIST_FULL/$target" &&  zip -r "${OPT_ZIP[@]}" "$ROOT/$PUB/luax-full-$target.zip" . ) &
+            ;;
+    esac
 done
 wait
 
