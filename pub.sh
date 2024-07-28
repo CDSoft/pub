@@ -432,18 +432,18 @@ OPT_ZIP=(
 
 for target in "${TARGETS[@]}"
 do
-    ( cd "$DIST_LUAX/$target" && tar -cvf "$ROOT/$PUB/luax-$target.tar.xz"      "${OPT_XZ[@]}" . ) &
-    ( cd "$DIST_FULL/$target" && tar -cvf "$ROOT/$PUB/luax-full-$target.tar.xz" "${OPT_XZ[@]}" . ) &
+    ( cd "$DIST_LUAX/$target" && tar -cvf "$ROOT/$PUB/luax-$target.tar.xz"      "${OPT_XZ[@]}" bin lib ) &
+    ( cd "$DIST_FULL/$target" && tar -cvf "$ROOT/$PUB/luax-full-$target.tar.xz" "${OPT_XZ[@]}" bin lib ) &
 
-    #( cd "$DIST_LUAX/$target" && tar -cvf "$ROOT/$PUB/luax-$target.tar.gz"      "${OPT_GZ[@]}" . ) &
-    #( cd "$DIST_FULL/$target" && tar -cvf "$ROOT/$PUB/luax-full-$target.tar.gz" "${OPT_GZ[@]}" . ) &
+    #( cd "$DIST_LUAX/$target" && tar -cvf "$ROOT/$PUB/luax-$target.tar.gz"      "${OPT_GZ[@]}" bin lib ) &
+    #( cd "$DIST_FULL/$target" && tar -cvf "$ROOT/$PUB/luax-full-$target.tar.gz" "${OPT_GZ[@]}" bin lib ) &
 
     case "$target" in
         windows-*)
             rm -f "$ROOT/$PUB/luax-$target.zip"
             rm -f "$ROOT/$PUB/luax-full-$target.zip"
-            ( cd "$DIST_LUAX/$target" &&  zip -r "${OPT_ZIP[@]}" "$ROOT/$PUB/luax-$target.zip" . ) &
-            ( cd "$DIST_FULL/$target" &&  zip -r "${OPT_ZIP[@]}" "$ROOT/$PUB/luax-full-$target.zip" . ) &
+            ( cd "$DIST_LUAX/$target" &&  zip -r "${OPT_ZIP[@]}" "$ROOT/$PUB/luax-$target.zip" bin lib ) &
+            ( cd "$DIST_FULL/$target" &&  zip -r "${OPT_ZIP[@]}" "$ROOT/$PUB/luax-full-$target.zip" bin lib ) &
             ;;
     esac
 done
