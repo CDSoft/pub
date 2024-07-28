@@ -52,6 +52,9 @@ tag()
 ZIG_VERSION=0.13.0
 LZ4_VERSION="$(tag lz4/lz4 | sed 's/^v//')"
 LZIP_VERSION=1.24.1
+LZLIB_VERSION=1.14
+TARLZ_VERSION=0.25
+PLZIP_VERSION=1.11
 DITAA_VERSION="$(tag stathissideris/ditaa | sed 's/^v//')"
 PLANTUML_VERSION="$(tag plantuml/plantuml | sed 's/^v//')"
 PANDOC_VERSION="$(tag jgm/pandoc | sed 's/^v//')"
@@ -162,6 +165,56 @@ download "$LZIP_URL" "$LZIP_PATH/$LZIP_ARCHIVE"
     "$LZIP_SRC"/*.cc -o "$LZIP_SRC/lzip"
 install "$LZIP_SRC/lzip" "$HOME/.local/bin/"
 
+# lzlib
+
+LZLIB_ARCHIVE="lzlib-$LZLIB_VERSION.tar.lz"
+LZLIB_URL="http://download.savannah.gnu.org/releases/lzip/lzlib/$LZLIB_ARCHIVE"
+LZLIB_PATH="$CACHE/lzlib"
+LZLIB_SRC="$LZLIB_PATH/lzlib-$LZLIB_VERSION"
+
+mkdir -p "$LZLIB_PATH"
+
+download "$LZLIB_URL" "$LZLIB_PATH/$LZLIB_ARCHIVE"
+[ -d "$LZLIB_SRC" ] || tar --lzip -xf "$LZLIB_PATH/$LZLIB_ARCHIVE" -C "$LZLIB_PATH"
+[ -f "$LZLIB_SRC/lzlib.o" ] || $ZIG cc -c "${CFLAGS[@]}" \
+    "$LZLIB_SRC/lzlib.c" -o "$LZLIB_SRC/lzlib.o"
+
+# tarlz
+
+TARLZ_ARCHIVE="tarlz-$TARLZ_VERSION.tar.lz"
+TARLZ_URL="http://download.savannah.gnu.org/releases/lzip/tarlz/$TARLZ_ARCHIVE"
+TARLZ_PATH="$CACHE/tarlz"
+TARLZ_SRC="$TARLZ_PATH/tarlz-$TARLZ_VERSION"
+
+mkdir -p "$TARLZ_PATH"
+
+download "$TARLZ_URL" "$TARLZ_PATH/$TARLZ_ARCHIVE"
+[ -d "$TARLZ_SRC" ] || tar --lzip -xf "$TARLZ_PATH/$TARLZ_ARCHIVE" -C "$TARLZ_PATH"
+[ -x "$TARLZ_SRC/tarlz" ] || $ZIG c++ "${CFLAGS[@]}" \
+    -DPROGVERSION="\"$TARLZ_VERSION\"" \
+    -I"$LZLIB_SRC" \
+    "$LZLIB_SRC/lzlib.o" \
+    "$TARLZ_SRC"/*.cc -o "$TARLZ_SRC/tarlz"
+install "$TARLZ_SRC/tarlz" "$HOME/.local/bin/"
+
+# plzip
+
+PLZIP_ARCHIVE="plzip-$PLZIP_VERSION.tar.lz"
+PLZIP_URL="http://download.savannah.gnu.org/releases/lzip/plzip/$PLZIP_ARCHIVE"
+PLZIP_PATH="$CACHE/plzip"
+PLZIP_SRC="$PLZIP_PATH/plzip-$PLZIP_VERSION"
+
+mkdir -p "$PLZIP_PATH"
+
+download "$PLZIP_URL" "$PLZIP_PATH/$PLZIP_ARCHIVE"
+[ -d "$PLZIP_SRC" ] || tar --lzip -xf "$PLZIP_PATH/$PLZIP_ARCHIVE" -C "$PLZIP_PATH"
+[ -x "$PLZIP_SRC/plzip" ] || $ZIG c++ "${CFLAGS[@]}" \
+    -DPROGVERSION="\"$PLZIP_VERSION\"" \
+    -I"$LZLIB_SRC" \
+    "$LZLIB_SRC/lzlib.o" \
+    "$PLZIP_SRC"/*.cc -o "$PLZIP_SRC/plzip"
+install "$PLZIP_SRC/plzip" "$HOME/.local/bin/"
+
 ###############################################################################
 # LuaX
 ###############################################################################
@@ -199,11 +252,37 @@ done
 for target in "${TARGETS[@]}"
 do
     exe=$(ext "$target")
+
     mkdir -p "$LZIP_SRC/$target"
     [ -x "$LZIP_SRC/$target/lzip$exe" ] || $ZIG c++ -target "$(zig_target "$target")" "${CFLAGS[@]}" \
         -DPROGVERSION="\"$LZIP_VERSION\"" \
         "$LZIP_SRC"/*.cc -o "$LZIP_SRC/$target/lzip$exe"
     cp -f "$LZIP_SRC/$target/lzip$exe" "$DIST_FULL/$target/bin/"
+
+    case "$target" in
+        windows-*)  continue ;; # tarlz and plzip are not compiled for Windows
+    esac
+
+    mkdir -p "$LZLIB_SRC/$target"
+    [ -f "$LZLIB_SRC/$target/lzlib.o" ] || $ZIG cc -c -target "$(zig_target "$target")" "${CFLAGS[@]}" \
+        "$LZLIB_SRC/lzlib.c" -o "$LZLIB_SRC/$target/lzlib.o"
+
+    mkdir -p "$TARLZ_SRC/$target"
+    [ -x "$TARLZ_SRC/$target/tarlz$exe" ] || $ZIG c++ -target "$(zig_target "$target")" "${CFLAGS[@]}" \
+        -DPROGVERSION="\"$TARLZ_VERSION\"" \
+        -I"$LZLIB_SRC" \
+        "$LZLIB_SRC/$target/lzlib.o" \
+        "$TARLZ_SRC"/*.cc -o "$TARLZ_SRC/$target/tarlz$exe"
+    cp -f "$TARLZ_SRC/$target/tarlz$exe" "$DIST_FULL/$target/bin/"
+
+    mkdir -p "$PLZIP_SRC/$target"
+    [ -x "$PLZIP_SRC/$target/plzip$exe" ] || $ZIG c++ -target "$(zig_target "$target")" "${CFLAGS[@]}" \
+        -DPROGVERSION="\"$PLZIP_VERSION\"" \
+        -I"$LZLIB_SRC" \
+        "$LZLIB_SRC/$target/lzlib.o" \
+        "$PLZIP_SRC"/*.cc -o "$PLZIP_SRC/$target/plzip$exe"
+    cp -f "$PLZIP_SRC/$target/plzip$exe" "$DIST_FULL/$target/bin/"
+
 done
 
 ###############################################################################
