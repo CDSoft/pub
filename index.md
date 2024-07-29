@@ -49,7 +49,7 @@ $ export PREFIX=install/path
 ``` sh
 $ git clone https://github.com/CDSoft/luax
 $ cd luax
-$ ./bootstrap && ninja install
+$ ./bootstrap.sh && ninja install
 $ cd ..
 ```
 

@@ -22,8 +22,13 @@
 CACHE=cache
 DIST="$CACHE/dist"
 DIST_LUAX="$DIST/luax"
-DIST_FULL="$DIST/full"
+DIST_FULL="$DIST/luax-full"
 PUB=pub
+
+DISTRIBS=(
+    "$DIST_LUAX"
+    "$DIST_FULL"
+)
 
 ROOT="$(realpath "$(dirname "$0")")"
 
@@ -46,19 +51,19 @@ tag()
         curl -sSL "$request" | jq -r .tag_name > "$tag_file"
         touch "$tag_file"
     fi
-    cat "$tag_file"
+    sed 's/^v//' "$tag_file"
 }
 
 ZIG_VERSION=0.13.0
-LZ4_VERSION="$(tag lz4/lz4 | sed 's/^v//')"
+LZ4_VERSION="$(tag lz4/lz4)"
 LZIP_VERSION=1.24.1
 LZLIB_VERSION=1.14
 TARLZ_VERSION=0.25
 PLZIP_VERSION=1.11
-DITAA_VERSION="$(tag stathissideris/ditaa | sed 's/^v//')"
-PLANTUML_VERSION="$(tag plantuml/plantuml | sed 's/^v//')"
-PANDOC_VERSION="$(tag jgm/pandoc | sed 's/^v//')"
-TYPST_VERSION="$(tag typst/typst | sed 's/^v//')"
+DITAA_VERSION="$(tag stathissideris/ditaa)"
+PLANTUML_VERSION="$(tag plantuml/plantuml)"
+PANDOC_VERSION="$(tag jgm/pandoc)"
+TYPST_VERSION="$(tag typst/typst)"
 
 ###############################################################################
 # Install necessary tools on the host
@@ -102,7 +107,11 @@ download()
 {
     local URL="$1"
     local DIR="$2"
-    [ -f "$DIR" ] || curl -fsSL "$URL" -o "$DIR"
+    if ! [ -f "$DIR" ]
+    then
+        echo "Download $URL"
+        curl -fsSL "$URL" -o "$DIR"
+    fi
 }
 
 # LuaX
@@ -511,20 +520,22 @@ OPT_ZIP=(
 
 for target in "${TARGETS[@]}"
 do
-    ( cd "$DIST_LUAX/$target" && tar -cvf "$ROOT/$PUB/luax-$target.tar.xz"      "${OPT_XZ[@]}" bin lib ) &
-    ( cd "$DIST_FULL/$target" && tar -cvf "$ROOT/$PUB/luax-full-$target.tar.xz" "${OPT_XZ[@]}" bin lib ) &
+    for distrib in "${DISTRIBS[@]}"
+    do
+        name=$(basename "$distrib")
+        readarray -t dirs < <(cd "$distrib/$target" && ls)
 
-    #( cd "$DIST_LUAX/$target" && tar -cvf "$ROOT/$PUB/luax-$target.tar.gz"      "${OPT_GZ[@]}" bin lib ) &
-    #( cd "$DIST_FULL/$target" && tar -cvf "$ROOT/$PUB/luax-full-$target.tar.gz" "${OPT_GZ[@]}" bin lib ) &
+        ( cd "$distrib/$target" && tar -cvf "$ROOT/$PUB/$name-$target.tar.xz" "${OPT_XZ[@]}" "${dirs[@]}" ) &
 
-    case "$target" in
-        windows-*)
-            rm -f "$ROOT/$PUB/luax-$target.zip"
-            rm -f "$ROOT/$PUB/luax-full-$target.zip"
-            ( cd "$DIST_LUAX/$target" &&  zip -r "${OPT_ZIP[@]}" "$ROOT/$PUB/luax-$target.zip" bin lib ) &
-            ( cd "$DIST_FULL/$target" &&  zip -r "${OPT_ZIP[@]}" "$ROOT/$PUB/luax-full-$target.zip" bin lib ) &
-            ;;
-    esac
+        #( cd "$distrib/$target" && tar -cvf "$ROOT/$PUB/$name-$target.tar.gz" "${OPT_GZ[@]}" "${dirs[@]}" ) &
+
+        case "$target" in
+            windows-*)
+                rm -f "$ROOT/$PUB/$name-$target.zip"
+                ( cd "$distrib/$target" && zip -r "${OPT_ZIP[@]}" "$ROOT/$PUB/$name-$target.zip" "${dirs[@]}" ) &
+                ;;
+        esac
+    done
 done
 wait
 
