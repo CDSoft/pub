@@ -34,6 +34,7 @@ function archives(name)
         "| Target        | Installation                                  | Size |",
         "| :------------ | :-------------------------------------------- | ---: |",
     }
+    local i = (F.I % "@()") { URL = url }
     local targets = require "targets"
     targets : foreach(function(target)
         local archive_xz  = name.."-"..target.name..".tar.xz"
@@ -49,11 +50,10 @@ function archives(name)
             bins[#bins+1] = row("", ":window: ["..archive_zip.."]("..archive_zip..")", size("pub"/archive_zip))
         end
 
-        local i = (F.I % "@()") {
-            ARCHIVE_NAME = archive_xz,
-            URL = url,
-        }
-        fs.write("pub"/script, i(fs.read "install.sh"))
+        fs.write("pub"/script, i{ARCHIVE_NAME=archive_xz}(fs.read "install.sh"))
     end)
+
+    fs.write("pub"/name..".sh", i{SCHEME=name}(fs.read "luax.sh"))
+
     return bins
 end

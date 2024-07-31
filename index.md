@@ -132,6 +132,15 @@ The light LuaX archives contain LuaX binaries and some tools written in LuaX:
 - [ypp](https://cdelord.fr/ypp): generic text preprocessor with macro implemented in LuaX
 - [panda](https://cdelord.fr/panda): Pandoc Lua filter that works on internal Pandoc’s AST
 
+This command detects the OS and installs LuaX in `$PREFIX/bin` and `$PREFIX/lib` (the default prefix is `~/.local/bin` and `~/.local/lib`):
+
+``` sh
+curl https://cdelord.fr/pub/luax.sh | sh
+```
+
+If you want to install a specific version (e.g. binaries statically linked with musl or if you are on Windows),
+just pick the right command or archive here:
+
 @archives "luax"
 
 ## LuaX full
@@ -144,5 +153,14 @@ The full LuaX archives contain the same softwares than the light archives plus s
 - [PlantUML](https://plantuml.com/): highly versatile tool that facilitates the rapid and straightforward creation of a wide array of diagrams
 - [Pandoc](https://pandoc.org/): universal document converter
 - [Typst](https://typst.app/): compose papers faster, focus on your text and let Typst take care of layout and formatting
+
+This command detects the OS and installs LuaX in `$PREFIX/bin` and `$PREFIX/lib` (the default prefix is `~/.local/bin` and `~/.local/lib`):
+
+``` sh
+curl https://cdelord.fr/pub/luax-full.sh | sh
+```
+
+If you want to install a specific version (e.g. binaries statically linked with musl or if you are on Windows),
+just pick the right command or archive here:
 
 @archives "luax-full"

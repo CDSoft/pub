@@ -545,4 +545,4 @@ wait
 
 ypp -l index.lua index.md -o "$PUB/index.md"
 
-#pandoc --standalone "$PUB/index.md" -o "$PUB/index.html"
+#pandoc --standalone --from markdown+emoji --to html5 "$PUB/index.md" -o "$PUB/index.html"

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ######################################################################
 # This file is part of luax.
 #
@@ -19,10 +19,31 @@
 # http://cdelord.fr/luax and http://cdelord.fr/pub
 ######################################################################
 
-ARCHIVE_NAME="@(ARCHIVE_NAME)"
-ARCHIVE_URL="@(URL)/$ARCHIVE_NAME"
-
 set -e
+
+######################################################################
+# OS detection
+######################################################################
+
+ARCH="$(uname -m)"
+case "$ARCH" in
+    (arm64) ARCH=aarch64 ;;
+esac
+case "$(uname -s)" in
+    (Linux)  OS=linux ;;
+    (Darwin) OS=macos ;;
+    (MINGW*) OS=windows ;;
+    (*)      OS=unknown ;;
+esac
+
+case "$OS-$ARCH" in
+    (linux-x86_64|linux-aarch64|macos-x86_64|macos-aarch64|windows-x86_64) TARGET="$OS-$ARCH" ;;
+    (*) echo "Unknown target: $OS-$ARCH"; exit 1 ;;
+esac
+
+######################################################################
+# Installation prefix
+######################################################################
 
 [ -z "$PREFIX" ] && PREFIX=~/.local
 if ! [ -d "$PREFIX" ]
@@ -30,6 +51,13 @@ then
     echo "$PREFIX: not a directory"
     exit 1
 fi
+
+######################################################################
+# LuaX installation
+######################################################################
+
+ARCHIVE_NAME="@(SCHEME)-$TARGET.tar.xz"
+ARCHIVE_URL="@(URL)/$ARCHIVE_NAME"
 
 tmp="$(mktemp --directory --tmpdir luax.XXXXXX)"
 trap 'rm -rf "$tmp"' EXIT
