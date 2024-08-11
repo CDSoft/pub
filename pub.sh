@@ -510,6 +510,10 @@ OPT_XZ=(
     --use-compress-program='xz -6'
     --sort=name
 )
+OPT_LZ=(
+    --use-compress-program='lzip -6'
+    --sort=name
+)
 OPT_GZ=(
     --use-compress-program='gzip -9'
     --sort=name
@@ -526,7 +530,7 @@ do
         readarray -t dirs < <(cd "$distrib/$target" && ls)
 
         ( cd "$distrib/$target" && tar -cvf "$ROOT/$PUB/$name-$target.tar.xz" "${OPT_XZ[@]}" "${dirs[@]}" ) &
-
+        #( cd "$distrib/$target" && tar -cvf "$ROOT/$PUB/$name-$target.tar.lz" "${OPT_LZ[@]}" "${dirs[@]}" ) &
         #( cd "$distrib/$target" && tar -cvf "$ROOT/$PUB/$name-$target.tar.gz" "${OPT_GZ[@]}" "${dirs[@]}" ) &
 
         case "$target" in
