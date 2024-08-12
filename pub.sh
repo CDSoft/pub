@@ -543,6 +543,20 @@ do
 done
 wait
 
+for target in "${TARGETS[@]}"
+do
+    for distrib in "${DISTRIBS[@]}"
+    do
+        exe=$(ext "$target")
+        name=$(basename "$distrib")
+
+        ( luax pack.lua "$distrib/$target" -o "$distrib/$target.lar" &&
+          luax compile sfx.lua "$distrib/$target.lar" -t "$target" -b -o "$ROOT/$PUB/$name-$target$ext"
+        )
+    done
+done
+wait
+
 ###############################################################################
 # Index
 ###############################################################################
