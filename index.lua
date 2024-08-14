@@ -19,7 +19,7 @@
 ----------------------------------------------------------------------
 
 os.setlocale "C"
-DATE = os.date "%D"
+DATE = os.date "%B %d, %Y"
 
 local url = "https://cdelord.fr/pub"
 
