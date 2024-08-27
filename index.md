@@ -149,9 +149,9 @@ The full LuaX archives contain the same softwares than the light archives plus s
 
 - [lz4](https://lz4.org/): lossless compression algorithm, providing fast compression speed and super fast decompression speed
 - [lzip](https://www.nongnu.org/lzip/): lossless data compressor with a user interface similar to the one of gzip or bzip2 and using a simplified form of the *'Lempel-Ziv-Markov chain-Algorithm' (LZMA)*
-- [ditaa](https://ditaa.sourceforge.net/): small command-line utility written in Java, that can convert diagrams drawn using ascii art, into proper bitmap graphics
-- [PlantUML](https://plantuml.com/): highly versatile tool that facilitates the rapid and straightforward creation of a wide array of diagrams
-- [Pandoc](https://pandoc.org/): universal document converter
+@(when(RELEASE_DITAA) "- [ditaa](https://ditaa.sourceforge.net/): small command-line utility written in Java, that can convert diagrams drawn using ascii art, into proper bitmap graphics"
+)@(when(RELEASE_PLANTUML) "- [PlantUML](https://plantuml.com/): highly versatile tool that facilitates the rapid and straightforward creation of a wide array of diagrams"
+)- [Pandoc](https://pandoc.org/): universal document converter
 - [Typst](https://typst.app/): compose papers faster, focus on your text and let Typst take care of layout and formatting
 
 This command detects the OS and installs LuaX in `$PREFIX/bin` and `$PREFIX/lib` (the default prefix is `~/.local/bin` and `~/.local/lib`):

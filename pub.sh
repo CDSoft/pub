@@ -19,6 +19,9 @@
 # http://cdelord.fr/luax and http://cdelord.fr/pub
 ######################################################################
 
+RELEASE_PLANTUML=false
+RELEASE_DITAA=false
+
 CACHE=cache
 DIST="$CACHE/dist"
 DIST_LUAX="$DIST/luax"
@@ -392,29 +395,44 @@ done
 # Ditaa
 ###############################################################################
 
-DITAA_ARCHIVE="ditaa-${DITAA_VERSION}-standalone.jar"
-DITAA_URL="https://github.com/stathissideris/ditaa/releases/download/v${DITAA_VERSION}/$DITAA_ARCHIVE"
+if $RELEASE_DITAA
+then
 
-download "$DITAA_URL" "$CACHE/$DITAA_ARCHIVE"
+    DITAA_ARCHIVE="ditaa-${DITAA_VERSION}-standalone.jar"
+    DITAA_URL="https://github.com/stathissideris/ditaa/releases/download/v${DITAA_VERSION}/$DITAA_ARCHIVE"
 
-for target in "${TARGETS[@]}"
-do
-    ln -f "$CACHE/$DITAA_ARCHIVE" "$DIST_FULL/$target/bin/ditaa.jar"
-done
+    download "$DITAA_URL" "$CACHE/$DITAA_ARCHIVE"
+
+    for target in "${TARGETS[@]}"
+    do
+        ln -f "$CACHE/$DITAA_ARCHIVE" "$DIST_FULL/$target/bin/ditaa.jar"
+    done
+
+fi
 
 ###############################################################################
 # PlantUML
 ###############################################################################
 
-PLANTUML_ARCHIVE="plantuml-pdf-${PLANTUML_VERSION}.jar"
-PLANTUML_URL="https://github.com/plantuml/plantuml/releases/download/v${PLANTUML_VERSION}/$PLANTUML_ARCHIVE"
+if $RELEASE_PLANTUML
+then
 
-download "$PLANTUML_URL" "$CACHE/$PLANTUML_ARCHIVE"
+    PLANTUML_ARCHIVE="plantuml-pdf-${PLANTUML_VERSION}.jar"
+    PLANTUML_URL="https://github.com/plantuml/plantuml/releases/download/v${PLANTUML_VERSION}/$PLANTUML_ARCHIVE"
 
-for target in "${TARGETS[@]}"
-do
-    ln -f "$CACHE/$PLANTUML_ARCHIVE" "$DIST_FULL/$target/bin/plantuml.jar"
-done
+    case "$PLANTUML_VERSION" in
+        (*beta*)    ;;
+        (*)
+            download "$PLANTUML_URL" "$CACHE/$PLANTUML_ARCHIVE"
+
+            for target in "${TARGETS[@]}"
+            do
+                ln -f "$CACHE/$PLANTUML_ARCHIVE" "$DIST_FULL/$target/bin/plantuml.jar"
+            done
+            ;;
+    esac
+
+fi
 
 ###############################################################################
 # Pandoc
@@ -547,6 +565,10 @@ wait
 # Index
 ###############################################################################
 
-ypp -l index.lua index.md -o "$PUB/index.md"
+ypp \
+    -e "RELEASE_DITAA=$RELEASE_DITAA" \
+    -e "RELEASE_PLANTUML=$RELEASE_PLANTUML" \
+    -l index.lua \
+    index.md -o "$PUB/index.md"
 
 #pandoc --standalone --from markdown+emoji --to html5 "$PUB/index.md" -o "$PUB/index.html"
