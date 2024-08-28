@@ -22,6 +22,9 @@
 RELEASE_PLANTUML=false
 RELEASE_DITAA=false
 
+RELEASE_TARLZ=false
+RELEASE_PLZIP=false
+
 CACHE=cache
 DIST="$CACHE/dist"
 DIST_LUAX="$DIST/luax"
@@ -193,39 +196,49 @@ download "$LZLIB_URL" "$LZLIB_PATH/$LZLIB_ARCHIVE"
 
 # tarlz
 
-TARLZ_ARCHIVE="tarlz-$TARLZ_VERSION.tar.lz"
-TARLZ_URL="http://download.savannah.gnu.org/releases/lzip/tarlz/$TARLZ_ARCHIVE"
-TARLZ_PATH="$CACHE/tarlz"
-TARLZ_SRC="$TARLZ_PATH/tarlz-$TARLZ_VERSION"
+if $RELEASE_TARLZ
+then
 
-mkdir -p "$TARLZ_PATH"
+    TARLZ_ARCHIVE="tarlz-$TARLZ_VERSION.tar.lz"
+    TARLZ_URL="http://download.savannah.gnu.org/releases/lzip/tarlz/$TARLZ_ARCHIVE"
+    TARLZ_PATH="$CACHE/tarlz"
+    TARLZ_SRC="$TARLZ_PATH/tarlz-$TARLZ_VERSION"
 
-download "$TARLZ_URL" "$TARLZ_PATH/$TARLZ_ARCHIVE"
-[ -d "$TARLZ_SRC" ] || tar --lzip -xf "$TARLZ_PATH/$TARLZ_ARCHIVE" -C "$TARLZ_PATH"
-[ -x "$TARLZ_SRC/tarlz" ] || $ZIG c++ "${CFLAGS[@]}" \
-    -DPROGVERSION="\"$TARLZ_VERSION\"" \
-    -I"$LZLIB_SRC" \
-    "$LZLIB_SRC/lzlib.o" \
-    "$TARLZ_SRC"/*.cc -o "$TARLZ_SRC/tarlz"
-install "$TARLZ_SRC/tarlz" "$HOME/.local/bin/"
+    mkdir -p "$TARLZ_PATH"
+
+    download "$TARLZ_URL" "$TARLZ_PATH/$TARLZ_ARCHIVE"
+    [ -d "$TARLZ_SRC" ] || tar --lzip -xf "$TARLZ_PATH/$TARLZ_ARCHIVE" -C "$TARLZ_PATH"
+    [ -x "$TARLZ_SRC/tarlz" ] || $ZIG c++ "${CFLAGS[@]}" \
+        -DPROGVERSION="\"$TARLZ_VERSION\"" \
+        -I"$LZLIB_SRC" \
+        "$LZLIB_SRC/lzlib.o" \
+        "$TARLZ_SRC"/*.cc -o "$TARLZ_SRC/tarlz"
+    install "$TARLZ_SRC/tarlz" "$HOME/.local/bin/"
+
+fi
 
 # plzip
 
-PLZIP_ARCHIVE="plzip-$PLZIP_VERSION.tar.lz"
-PLZIP_URL="http://download.savannah.gnu.org/releases/lzip/plzip/$PLZIP_ARCHIVE"
-PLZIP_PATH="$CACHE/plzip"
-PLZIP_SRC="$PLZIP_PATH/plzip-$PLZIP_VERSION"
+if $RELEASE_PLZIP
+then
 
-mkdir -p "$PLZIP_PATH"
+    PLZIP_ARCHIVE="plzip-$PLZIP_VERSION.tar.lz"
+    PLZIP_URL="http://download.savannah.gnu.org/releases/lzip/plzip/$PLZIP_ARCHIVE"
+    PLZIP_PATH="$CACHE/plzip"
+    PLZIP_SRC="$PLZIP_PATH/plzip-$PLZIP_VERSION"
 
-download "$PLZIP_URL" "$PLZIP_PATH/$PLZIP_ARCHIVE"
-[ -d "$PLZIP_SRC" ] || tar --lzip -xf "$PLZIP_PATH/$PLZIP_ARCHIVE" -C "$PLZIP_PATH"
-[ -x "$PLZIP_SRC/plzip" ] || $ZIG c++ "${CFLAGS[@]}" \
-    -DPROGVERSION="\"$PLZIP_VERSION\"" \
-    -I"$LZLIB_SRC" \
-    "$LZLIB_SRC/lzlib.o" \
-    "$PLZIP_SRC"/*.cc -o "$PLZIP_SRC/plzip"
-install "$PLZIP_SRC/plzip" "$HOME/.local/bin/"
+    mkdir -p "$PLZIP_PATH"
+
+    download "$PLZIP_URL" "$PLZIP_PATH/$PLZIP_ARCHIVE"
+    [ -d "$PLZIP_SRC" ] || tar --lzip -xf "$PLZIP_PATH/$PLZIP_ARCHIVE" -C "$PLZIP_PATH"
+    [ -x "$PLZIP_SRC/plzip" ] || $ZIG c++ "${CFLAGS[@]}" \
+        -DPROGVERSION="\"$PLZIP_VERSION\"" \
+        -I"$LZLIB_SRC" \
+        "$LZLIB_SRC/lzlib.o" \
+        "$PLZIP_SRC"/*.cc -o "$PLZIP_SRC/plzip"
+    install "$PLZIP_SRC/plzip" "$HOME/.local/bin/"
+
+fi
 
 ###############################################################################
 # LuaX
@@ -279,21 +292,27 @@ do
     [ -f "$LZLIB_SRC/$target/lzlib.o" ] || $ZIG cc -c -target "$(zig_target "$target")" "${CFLAGS[@]}" \
         "$LZLIB_SRC/lzlib.c" -o "$LZLIB_SRC/$target/lzlib.o"
 
-    mkdir -p "$TARLZ_SRC/$target"
-    [ -x "$TARLZ_SRC/$target/tarlz$exe" ] || $ZIG c++ -target "$(zig_target "$target")" "${CFLAGS[@]}" \
-        -DPROGVERSION="\"$TARLZ_VERSION\"" \
-        -I"$LZLIB_SRC" \
-        "$LZLIB_SRC/$target/lzlib.o" \
-        "$TARLZ_SRC"/*.cc -o "$TARLZ_SRC/$target/tarlz$exe"
-    cp -f "$TARLZ_SRC/$target/tarlz$exe" "$DIST_FULL/$target/bin/"
+    if $RELEASE_TARLZ
+    then
+        mkdir -p "$TARLZ_SRC/$target"
+        [ -x "$TARLZ_SRC/$target/tarlz$exe" ] || $ZIG c++ -target "$(zig_target "$target")" "${CFLAGS[@]}" \
+            -DPROGVERSION="\"$TARLZ_VERSION\"" \
+            -I"$LZLIB_SRC" \
+            "$LZLIB_SRC/$target/lzlib.o" \
+            "$TARLZ_SRC"/*.cc -o "$TARLZ_SRC/$target/tarlz$exe"
+        cp -f "$TARLZ_SRC/$target/tarlz$exe" "$DIST_FULL/$target/bin/"
+    fi
 
-    mkdir -p "$PLZIP_SRC/$target"
-    [ -x "$PLZIP_SRC/$target/plzip$exe" ] || $ZIG c++ -target "$(zig_target "$target")" "${CFLAGS[@]}" \
-        -DPROGVERSION="\"$PLZIP_VERSION\"" \
-        -I"$LZLIB_SRC" \
-        "$LZLIB_SRC/$target/lzlib.o" \
-        "$PLZIP_SRC"/*.cc -o "$PLZIP_SRC/$target/plzip$exe"
-    cp -f "$PLZIP_SRC/$target/plzip$exe" "$DIST_FULL/$target/bin/"
+    if $RELEASE_PLZIP
+    then
+        mkdir -p "$PLZIP_SRC/$target"
+        [ -x "$PLZIP_SRC/$target/plzip$exe" ] || $ZIG c++ -target "$(zig_target "$target")" "${CFLAGS[@]}" \
+            -DPROGVERSION="\"$PLZIP_VERSION\"" \
+            -I"$LZLIB_SRC" \
+            "$LZLIB_SRC/$target/lzlib.o" \
+            "$PLZIP_SRC"/*.cc -o "$PLZIP_SRC/$target/plzip$exe"
+        cp -f "$PLZIP_SRC/$target/plzip$exe" "$DIST_FULL/$target/bin/"
+    fi
 
 done
 
